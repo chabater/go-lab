@@ -1,0 +1,39 @@
+package main
+
+import (
+    "io"
+    "net/http"
+    "os"
+)
+
+func main() {
+    resp, err := http.Get("http://example.com")
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    file, err := os.Create("output.txt")
+    if err != nil {
+        panic(err)
+    }
+    defer file.Close()
+
+    buf := make([]byte, 1)
+    for {
+        n, err := resp.Body.Read(buf)
+        if n > 0 {
+            _, err = file.Write(buf[:n])
+            if err != nil {
+                panic(err)
+            }
+        }
+        if err == io.EOF {
+            break
+        }
+        if err != nil {
+            panic(err)
+        }
+    }
+}
+
